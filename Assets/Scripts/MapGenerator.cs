@@ -9,7 +9,7 @@ public class MapGenerator : MonoBehaviour {
 	// vertices = ((width - 1) / i) + 1
 	// limit for a suqare chunk is 65025 vertices: 255^2, so a max-width of 255
 	// we use 241, because 240 (width - 1) is divisible by 2, 4, 6, 10, 12
-	const int mapChunkSize = 241;
+	public const int mapChunkSize = 241;
 	[Range(0, 6)]
 	public int levelOfDetail;
 
