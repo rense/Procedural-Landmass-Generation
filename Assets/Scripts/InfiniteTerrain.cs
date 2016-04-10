@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class InfiniteTerrain : MonoBehaviour {
 
+	const float scale = 5f;
+
 	const float viewerMoveTresholdForChunkUpdate = 25f;
 	const float sqrViewerMoveTresholdForChunkUpdate = viewerMoveTresholdForChunkUpdate * viewerMoveTresholdForChunkUpdate;
 	public LODInfo[] detailLevels;
@@ -20,7 +22,7 @@ public class InfiniteTerrain : MonoBehaviour {
 	int chunksVisibleInViewDistance;
 
 	Dictionary<Vector2, Chunk> chunks = new Dictionary<Vector2, Chunk>();
-	List<Chunk> chunksVisibleLastUpdate = new List<Chunk>();
+	static List<Chunk> chunksVisibleLastUpdate = new List<Chunk>();
 
 	void Start() {
 		mapGenerator = FindObjectOfType<MapGenerator>();
@@ -33,7 +35,7 @@ public class InfiniteTerrain : MonoBehaviour {
 	}
 
 	void Update() {
-		viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
+		viewerPosition = new Vector2(viewer.position.x, viewer.position.z) / scale;
 
 		if((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveTresholdForChunkUpdate) {
 			viewerPositionOld = viewerPosition;
@@ -61,9 +63,6 @@ public class InfiniteTerrain : MonoBehaviour {
 
 				if(chunks.ContainsKey(viewedChunkCoord)) {
 					chunks[viewedChunkCoord].UpdateTerrainChunk();
-					if(chunks[viewedChunkCoord].IsVisible()) {
-						chunksVisibleLastUpdate.Add(chunks[viewedChunkCoord]);
-					}
 				} else {
 					chunks.Add(viewedChunkCoord, new Chunk(viewedChunkCoord, chunkSize, detailLevels, transform, mapMaterial));
 				}
@@ -101,8 +100,9 @@ public class InfiniteTerrain : MonoBehaviour {
 			meshFilter = meshObject.AddComponent<MeshFilter>();
 			meshRenderer.material = material;
 
-			meshObject.transform.position = positionV3;
+			meshObject.transform.position = positionV3 * scale;
 			meshObject.transform.parent = parent;
+			meshObject.transform.localScale = Vector3.one * scale;
 			SetVisible(false);
 
 			lodMeshes = new LODMesh[detailLevels.Length];
@@ -130,8 +130,8 @@ public class InfiniteTerrain : MonoBehaviour {
 			if(mapDataReveived) {
 				float viewerDistanceFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
 				bool visible = viewerDistanceFromNearestEdge <= maxViewDistance;
+
 				if(visible) {
-				
 					int lodIndex = 0;
 
 					for(int i = 0; i < detailLevels.Length - 1; i++) {
@@ -151,6 +151,7 @@ public class InfiniteTerrain : MonoBehaviour {
 							lodMesh.RequestMesh(mapData);
 						}
 					}
+					chunksVisibleLastUpdate.Add(this);
 				}
 				SetVisible(visible);
 			}
