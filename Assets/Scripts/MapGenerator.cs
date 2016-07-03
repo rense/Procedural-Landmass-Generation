@@ -14,10 +14,12 @@ public class MapGenerator : MonoBehaviour {
 	// vertices = ((width - 1) / i) + 1
 	// limit for a suqare chunk is 65025 vertices: 255^2, so a max-width of 255
 	// we use 241, because 240 (width - 1) is divisible by 2, 4, 6, 10, 12
-	public const int mapChunkSize = 241;
+
+	// minus 2 because of borderedSize
+	public const int mapChunkSize = 239;
+
 	[Range(0, 6)]
 	public int editorPreviewLOD;
-
 	public float noiseScale;
 
 	public int octaves;
@@ -94,7 +96,7 @@ public class MapGenerator : MonoBehaviour {
 
 	MapData GenerateMapData(Vector2 center) {
 		float[,] noiseMap = Noise.GenerateNoiseMap(
-			mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, center + offset, normalizeMode
+			mapChunkSize + 2, mapChunkSize + 2, seed, noiseScale, octaves, persistance, lacunarity, center + offset, normalizeMode
 		);
 
 		Color[] colorMap = new Color[mapChunkSize * mapChunkSize];
