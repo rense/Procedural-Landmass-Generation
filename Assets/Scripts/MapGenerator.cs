@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class MapGenerator : MonoBehaviour {
 
-	public enum DrawMode {NoiseMap, ColorMap, Mesh, FalloffMap};
+	public enum DrawMode {NoiseMap, Mesh, FalloffMap};
 	public DrawMode drawMode;
 
 	public TerrainData terrainData;
@@ -17,17 +17,10 @@ public class MapGenerator : MonoBehaviour {
 
 	public bool autoUpdate;
 
-	public TerrainType[] regions;
-	static MapGenerator instance;
-
 	float[,] falloffMap;
 
 	Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
 	Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
-
-	void Awake() {
-		falloffMap = FalloffGenerator.GenerateFalloffMap(mapChunkSize);
-	}
 
 	void OnValuesUpdated() {
 		if(!Application.isPlaying) {
@@ -35,12 +28,9 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
-	public static int mapChunkSize {
+	public int mapChunkSize {
 		get {
-			if(instance == null) {
-				instance = FindObjectOfType<MapGenerator>();
-			}
-			if(!instance.terrainData.useFlatShading) {
+			if(!terrainData.useFlatShading) {
 				// vertices = ((width - 1) / i) + 1
 				// limit for a square chunk is 65025 vertices: 255^2, so a max-width of 255
 				// we use 241, because 240 (width - 1) is divisible by 2, 4, 6, 10, 12
@@ -116,26 +106,22 @@ public class MapGenerator : MonoBehaviour {
 			noiseData.normalizeMode
 		);
 
-		Color[] colorMap = new Color[mapChunkSize * mapChunkSize];
+		if(terrainData.useFalloff) {
 
-		for(int y = 0; y < mapChunkSize; y++) {
-			for(int x = 0; x < mapChunkSize; x++) {
+			if(falloffMap == null) {
+				falloffMap = FalloffGenerator.GenerateFalloffMap(mapChunkSize + 2);
+			}
+			
+			for(int y = 0; y < mapChunkSize + 2; y++) {
+				for(int x = 0; x < mapChunkSize + 2; x++) {
 
-				if(terrainData.useFalloff) {
-					noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
-				}
-
-				float currentHeight = noiseMap[x, y];
-				for(int i = 0; i < regions.Length; i++) {
-					if(currentHeight >= regions[i].height) {
-						colorMap[y * mapChunkSize + x] = regions[i].color;
-					} else {
-						break;
+					if(terrainData.useFalloff) {
+						noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
 					}
 				}
 			}
 		}
-		return new MapData(noiseMap, colorMap);
+		return new MapData(noiseMap);
 	}
 
 	public void DrawMapInEditor() {
@@ -143,8 +129,6 @@ public class MapGenerator : MonoBehaviour {
 		MapDisplay display = FindObjectOfType<MapDisplay>();
 		if(drawMode == DrawMode.NoiseMap) {
 			display.DrawTexture(TextureGenerator.TextureFromHeightMap(mapData.heightMap));
-		} else if(drawMode == DrawMode.ColorMap) {
-			display.DrawTexture(TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize));
 		} else if(drawMode == DrawMode.Mesh) {
 			display.DrawMesh(
 				MeshGenerator.GenerateTerrainMesh(
@@ -152,9 +136,8 @@ public class MapGenerator : MonoBehaviour {
 					terrainData.meshHeightMultiplier, 
 					terrainData.meshHeightCurve, 
 					editorPreviewLOD, 
-					terrainData.useFlatShading),
-				
-				TextureGenerator.TextureFromColorMap(mapData.colorMap, mapChunkSize, mapChunkSize)
+					terrainData.useFlatShading
+				)
 			);
 		} else if(drawMode == DrawMode.FalloffMap) {
 			display.DrawTexture(TextureGenerator.TextureFromHeightMap(FalloffGenerator.GenerateFalloffMap(mapChunkSize)));
@@ -171,8 +154,6 @@ public class MapGenerator : MonoBehaviour {
 			noiseData.OnValuesUpdated -= OnValuesUpdated;
 			noiseData.OnValuesUpdated += OnValuesUpdated;
 		}
-
-		falloffMap = FalloffGenerator.GenerateFalloffMap(mapChunkSize);
 	}
 
 	struct MapThreadInfo<T> {
@@ -186,19 +167,11 @@ public class MapGenerator : MonoBehaviour {
 	}
 }
 
-[System.Serializable]
-public struct TerrainType {
-	public string name;
-	public float height;
-	public Color color;
-}
 
 public struct MapData {
 	public readonly float[,] heightMap;
-	public readonly Color[] colorMap;
 
-	public MapData(float[,] heightMap, Color[] colorMap) {
+	public MapData(float[,] heightMap) {
 		this.heightMap = heightMap;
-		this.colorMap = colorMap;
 	}
 }

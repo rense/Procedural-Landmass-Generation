@@ -27,7 +27,7 @@ public class InfiniteTerrain : MonoBehaviour {
 		mapGenerator = FindObjectOfType<MapGenerator>();
 
 		maxViewDistance = detailLevels[detailLevels.Length - 1].visibleDistanceTreshold;
-		chunkSize = MapGenerator.mapChunkSize - 1;
+		chunkSize = mapGenerator.mapChunkSize - 1;
 		chunksVisibleInViewDistance = Mathf.RoundToInt(maxViewDistance / chunkSize);
 
 		UpdateVisibleChunks();
@@ -40,8 +40,6 @@ public class InfiniteTerrain : MonoBehaviour {
 			viewerPositionOld = viewerPosition;
 			UpdateVisibleChunks();
 		}
-
-
 	}
 
 	void UpdateVisibleChunks() {
@@ -123,12 +121,7 @@ public class InfiniteTerrain : MonoBehaviour {
 		void OnMapDataReceived(MapData mapData) {
 			this.mapData = mapData;
 			mapDataReveived = true;
-
-			Texture2D texture = TextureGenerator.TextureFromColorMap(
-				mapData.colorMap, MapGenerator.mapChunkSize, MapGenerator.mapChunkSize
-			);
-			meshRenderer.material.mainTexture = texture;
-
+		
 			UpdateTerrainChunk();
 		}
 			
