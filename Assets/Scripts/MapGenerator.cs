@@ -11,6 +11,9 @@ public class MapGenerator : MonoBehaviour {
 
 	public TerrainData terrainData;
 	public NoiseData noiseData;
+	public TextureData textureData;
+
+	public Material terrainMaterial;
 
 	[Range(0, 6)]
 	public int editorPreviewLOD;
@@ -26,6 +29,10 @@ public class MapGenerator : MonoBehaviour {
 		if(!Application.isPlaying) {
 			DrawMapInEditor();
 		}
+	}
+
+	void OnTextureValuesUpdated() {
+		textureData.ApplyToMaterial(terrainMaterial);
 	}
 
 	public int mapChunkSize {
@@ -153,6 +160,10 @@ public class MapGenerator : MonoBehaviour {
 		if(noiseData != null) {
 			noiseData.OnValuesUpdated -= OnValuesUpdated;
 			noiseData.OnValuesUpdated += OnValuesUpdated;
+		}
+		if(textureData != null) {
+			textureData.OnValuesUpdated -= OnTextureValuesUpdated;
+			textureData.OnValuesUpdated += OnTextureValuesUpdated;
 		}
 	}
 
