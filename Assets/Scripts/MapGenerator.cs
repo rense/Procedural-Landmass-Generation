@@ -121,13 +121,13 @@ public class MapGenerator : MonoBehaviour {
 			
 			for(int y = 0; y < mapChunkSize + 2; y++) {
 				for(int x = 0; x < mapChunkSize + 2; x++) {
-
 					if(terrainData.useFalloff) {
 						noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] - falloffMap[x, y]);
 					}
 				}
 			}
 		}
+		textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
 		return new MapData(noiseMap);
 	}
 
