@@ -15,7 +15,13 @@ public class MapGenerator : MonoBehaviour {
 
 	public Material terrainMaterial;
 
-	[Range(0, 6)]
+	[Range(0, MeshGenerator.numSupportedChunkSizes - 1)]
+	public int chunkSizeIndex;
+
+	[Range(0, MeshGenerator.numSupportedFlatshadedChunkSizes - 1)]
+	public int flatshadedChunkSizeIndex;
+
+	[Range(0, MeshGenerator.numSupportedLODs - 1)]
 	public int editorPreviewLOD;
 
 	public bool autoUpdate;
@@ -48,13 +54,14 @@ public class MapGenerator : MonoBehaviour {
 				// limit for a square chunk is 65025 vertices: 255^2, so a max-width of 255
 				// we use 241, because 240 (width - 1) is divisible by 2, 4, 6, 10, 12
 				// minus 2 because of borderedSize
-				return 239;
+				// return 239;
+				return MeshGenerator.supportedChunkSizes [chunkSizeIndex] - 1;
 			} else {
 				// alternative for flat-shading (96 - 1)
-				return 95;
+				// return 95;
+				return MeshGenerator.supportedFlatshadedChunkSizes [flatshadedChunkSizeIndex] - 1;
 			}
 		}
-
 	}
 
 	public void RequestMapData(Vector2 center, Action<MapData> callback) {
