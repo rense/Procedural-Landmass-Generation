@@ -87,7 +87,7 @@ public class NoiseSettings {
 
 	[Range(0, 1)]
 	public float persistance = .6f;
-	public float lacunarity = 1;
+	public float lacunarity = 2;
 
 	public int seed;
 	public Vector2 offset;
