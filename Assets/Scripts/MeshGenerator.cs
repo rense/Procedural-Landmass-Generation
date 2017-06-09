@@ -70,6 +70,22 @@ public class MeshGenerator {
 					Vector2 vertexPosition2D = topLeft + new Vector2 (percent.x, -percent.y) * meshSettings.meshWorldSize;
 					float height = heightMap [x, y];
 
+					if (isEdgeConnectionVertex) {
+						bool isVertical = x == 2 || x == numVertsPerLine - 3;
+						int distanceToMainVertexA = (isVertical ? y - 2 : x - 2) % skipIncrement;
+						int distanceToMainVertexB = skipIncrement - distanceToMainVertexA;
+						float distancePercent = distanceToMainVertexA / (float)skipIncrement;
+
+						float heightMainVertexA = heightMap[
+							isVertical ? x : x - distanceToMainVertexA, isVertical ? y - distanceToMainVertexA : y
+						];
+						float heightMainVertexB = heightMap[
+							isVertical ? x : x + distanceToMainVertexB, isVertical ? y + distanceToMainVertexB : y
+						];
+
+						height = heightMainVertexA * (1 - distancePercent) + heightMainVertexB * distancePercent;
+					}
+
 					meshData.AddVertex (
 						new Vector3 (vertexPosition2D.x, height, vertexPosition2D.y), 
 						percent,
