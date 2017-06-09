@@ -20,11 +20,9 @@ public class MeshSettings : UpdatableData  {
 	public int flatshadedChunkSizeIndex;
 
 	// number of vertices per line of mesh rendered at LOD = 0
-	// includes the 2 extra verts that are excluded from final mesh,
-	// but used for calculating normals.
 	public int numVertsPerLine {
 		get {
-			return supportedChunkSizes [(useFlatShading) ? flatshadedChunkSizeIndex : chunkSizeIndex] + 1;
+			return supportedChunkSizes [(useFlatShading) ? flatshadedChunkSizeIndex : chunkSizeIndex] + 5;
 		}
 	}
 
