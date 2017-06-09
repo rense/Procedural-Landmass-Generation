@@ -108,8 +108,6 @@ public class MeshGenerator {
 							meshData.AddTriangle (d, a, b);
 						}
 					}
-
-					vertexIndex++;
 				}
 			}
 		}
